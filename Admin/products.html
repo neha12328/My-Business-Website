@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Products | Admin Panel</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body class="dashboard-page">
+
+    <div class="dashboard-layout">
+
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+                <h2>⚡ Shri Shiv Enterprises</h2>
+                <p>Website Administration</p>
+            </div>
+
+            <div class="sidebar-menu">
+
+                <a href="dashboard.html">
+                    📊 Dashboard
+                </a>
+
+                <a href="products.html" class="active">
+                    🚗 Manage Products
+                </a>
+
+                <a href="enquiries.html">
+                    📩 Enquiries
+                </a>
+
+                <a href="gallery.html">
+                    🖼️ Gallery
+                </a>
+
+                <a href="festival.html">
+                    🎉 Festival Updates
+                </a>
+
+                <a href="../index.html" target="_blank">
+                    🌐 View Website
+                </a>
+
+                <button class="logout-btn" onclick="logoutAdmin()">
+                    🚪 Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =========================
+             MAIN CONTENT
+        ========================== -->
+
+        <main class="dashboard-main">
+
+            <!-- Header -->
+
+            <header class="dashboard-header">
+
+                <div>
+                    <h1>Manage Products</h1>
+
+                    <p>
+                        Add and manage your electric e-rickshaw products.
+                    </p>
+                </div>
+
+                <a
+                    href="../index.html"
+                    target="_blank"
+                    class="header-btn"
+                >
+                    View Website
+                </a>
+
+            </header>
+
+
+            <!-- =========================
+                 ADD PRODUCT
+            ========================== -->
+
+            <section class="dashboard-section">
+
+                <h2>Add New Product</h2>
+
+                <form
+                    id="productForm"
+                    class="admin-form"
+                >
+
+                    <!-- Product Name -->
+
+                    <label for="productName">
+                        Product Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="productName"
+                        placeholder="Example: Super Metro E-Rickshaw"
+                        required
+                    >
+
+
+                    <!-- Product Category -->
+
+                    <label for="productCategory">
+                        Product Category
+                    </label>
+
+                    <input
+                        type="text"
+                        id="productCategory"
+                        placeholder="Example: Passenger E-Rickshaw"
+                        required
+                    >
+
+
+                    <!-- Product Price -->
+
+                    <label for="productPrice">
+                        Product Price
+                    </label>
+
+                    <input
+                        type="number"
+                        id="productPrice"
+                        placeholder="Example: 150000"
+                        min="0"
+                        required
+                    >
+
+
+                    <!-- Product Description -->
+
+                    <label for="productDescription">
+                        Product Description
+                    </label>
+
+                    <textarea
+                        id="productDescription"
+                        rows="4"
+                        placeholder="Enter product description"
+                        required
+                    ></textarea>
+
+
+                    <!-- Product Image -->
+
+                    <label for="productImage">
+                        Image File Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="productImage"
+                        placeholder="Example: Golden.jpeg"
+                        required
+                    >
+
+
+                    <!-- Add Button -->
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Add Product
+                    </button>
+
+
+                    <!-- Status -->
+
+                    <p id="productStatus"></p>
+
+                </form>
+
+            </section>
+
+
+            <!-- =========================
+                 CURRENT PRODUCTS
+            ========================== -->
+
+            <section class="dashboard-section product-list-section">
+
+                <h2>Current Products</h2>
+
+                <div
+                    id="productList"
+                    class="admin-product-list"
+                ></div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        // =====================================================
+        // ADMIN LOGIN CHECK
+        // =====================================================
+
+        const adminToken = localStorage.getItem("adminToken");
+
+        if (!adminToken) {
+            window.location.href = "login.html";
+        }
+
+
+        // =====================================================
+        // LOGOUT
+        // =====================================================
+
+        function logoutAdmin() {
+
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminUser");
+
+            window.location.href = "login.html";
+        }
+
+
+        // =====================================================
+        // ELEMENTS
+        // =====================================================
+
+        const productForm =
+            document.getElementById("productForm");
+
+        const productList =
+            document.getElementById("productList");
+
+        const productStatus =
+            document.getElementById("productStatus");
+
+
+        // =====================================================
+        // DISPLAY PRODUCTS
+        // =====================================================
+
+        async function displayProducts() {
+
+            try {
+
+                const response = await fetch(
+                    "https://shri-shiv-enterprises-backened.onrender.com/api/admin/products"
+                );
+
+                const products = await response.json();
+
+                productList.innerHTML = "";
+
+
+                if (!Array.isArray(products) || products.length === 0) {
+
+                    productList.innerHTML =
+                        "<p>No products available in database.</p>";
+
+                    return;
+                }
+
+
+                products.forEach(function (product) {
+
+                    const productItem =
+                        document.createElement("div");
+
+                    productItem.className =
+                        "admin-product-item";
+
+
+                    productItem.innerHTML = `
+
+                        <div>
+
+                            <h3>
+                                ${product.name}
+                            </h3>
+
+                            <span>
+                                ${product.category}
+                            </span>
+
+                            <p>
+                                ${product.description}
+                            </p>
+
+                            <strong>
+                                Price: ₹${product.price}
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                Image: ${product.image}
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteProduct('${product._id}')"
+                        >
+                            Delete
+                        </button>
+
+                    `;
+
+
+                    productList.appendChild(productItem);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error loading products:",
+                    error
+                );
+
+                productList.innerHTML =
+                    "<p style='color: red;'>Failed to load products from server.</p>";
+            }
+        }
+
+
+        // =====================================================
+        // ADD PRODUCT
+        // =====================================================
+
+        productForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                // Get values
+
+                const name =
+                    document.getElementById("productName").value.trim();
+
+                const category =
+                    document.getElementById("productCategory").value.trim();
+
+                const price =
+                    Number(
+                        document.getElementById("productPrice").value
+                    );
+
+                const description =
+                    document.getElementById("productDescription").value.trim();
+
+                const image =
+                    document.getElementById("productImage").value.trim();
+
+
+                // Create product object
+
+                const newProduct = {
+
+                    name: name,
+
+                    category: category,
+
+                    price: price,
+
+                    description: description,
+
+                    image: image
+                };
+
+
+                console.log(
+                    "Product being sent:",
+                    newProduct
+                );
+
+
+                try {
+
+                    const response = await fetch(
+                        "https://shri-shiv-enterprises-backened.onrender.com/api/admin/products",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify(newProduct)
+                        }
+                    );
+
+
+                    const result = await response.json();
+
+
+                    // Product successfully added
+
+                    if (response.ok) {
+
+                        productForm.reset();
+
+                        productStatus.textContent =
+                            "Product added to Database successfully!";
+
+                        productStatus.style.color =
+                            "green";
+
+                        displayProducts();
+
+                    }
+
+                    // Backend error
+
+                    else {
+
+                        console.error(
+                            "Backend Error:",
+                            result
+                        );
+
+                        productStatus.textContent =
+                            result.message ||
+                            "Failed to add product.";
+
+                        productStatus.style.color =
+                            "red";
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Save Error:",
+                        error
+                    );
+
+                    productStatus.textContent =
+                        "Server error while saving.";
+
+                    productStatus.style.color =
+                        "red";
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // DELETE PRODUCT
+        // =====================================================
+
+        async function deleteProduct(id) {
+
+            const confirmation =
+                confirm(
+                    "Are you sure you want to delete this product from database?"
+                );
+
+
+            if (!confirmation) {
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `https://shri-shiv-enterprises-backened.onrender.com/api/admin/products/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+                if (response.ok) {
+
+                    displayProducts();
+
+                }
+
+                else {
+
+                    alert(
+                        "Failed to delete product."
+                    );
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Delete Error:",
+                    error
+                );
+
+                alert(
+                    "Server error while deleting."
+                );
+            }
+        }
+
+
+        // =====================================================
+        // INITIAL LOAD
+        // =====================================================
+
+        displayProducts();
+
+    </script>
+
+</body>
+
+</html>

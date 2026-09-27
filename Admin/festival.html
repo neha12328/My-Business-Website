@@ -1,0 +1,699 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Festival Updates | Admin Panel</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+
+<body class="dashboard-page">
+
+    <div class="dashboard-layout">
+
+
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+
+                <h2>⚡ Shri Shiv Enterprises</h2>
+
+                <p>Website Administration</p>
+
+            </div>
+
+
+            <div class="sidebar-menu">
+
+                <a href="dashboard.html">
+                    📊 Dashboard
+                </a>
+
+                <a href="products.html">
+                    🚗 Manage Products
+                </a>
+
+                <a href="enquiries.html">
+                    📩 Enquiries
+                </a>
+
+                <a href="gallery.html">
+                    🖼️ Gallery
+                </a>
+
+                <a href="festival.html" class="active">
+                    🎉 Festival Updates
+                </a>
+
+                <a href="../index.html" target="_blank">
+                    🌐 View Website
+                </a>
+
+                <button class="logout-btn" onclick="logoutAdmin()">
+                    🚪 Logout
+                </button>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =========================
+             MAIN CONTENT
+        ========================== -->
+
+        <main class="dashboard-main">
+
+
+            <!-- HEADER -->
+
+            <header class="dashboard-header">
+
+                <div>
+
+                    <h1>Festival Updates</h1>
+
+                    <p>
+                        Manage festival greetings and special offers.
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="../index.html"
+                    target="_blank"
+                    class="header-btn"
+                >
+                    View Website
+                </a>
+
+            </header>
+
+
+
+            <!-- =========================
+                 FESTIVAL FORM
+            ========================== -->
+
+            <section class="dashboard-section">
+
+                <h2>Create Festival Update</h2>
+
+
+                <form
+                    id="festivalForm"
+                    class="admin-form"
+                >
+
+
+                    <!-- FESTIVAL NAME -->
+
+                    <label for="festivalName">
+                        Festival Name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="festivalName"
+                        placeholder="Example: Diwali"
+                        required
+                    >
+
+
+
+                    <!-- FESTIVAL MESSAGE -->
+
+                    <label for="festivalMessage">
+                        Festival Message
+                    </label>
+
+
+                    <textarea
+                        id="festivalMessage"
+                        rows="5"
+                        placeholder="Enter festival greeting or message..."
+                        required
+                    ></textarea>
+
+
+
+                    <!-- SPECIAL OFFER -->
+
+                    <label for="festivalOffer">
+                        Special Offer
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="festivalOffer"
+                        placeholder="Example: Special Diwali Offer Available"
+                    >
+
+
+
+                    <!-- SAVE BUTTON -->
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Save Festival Update
+                    </button>
+
+
+
+                    <!-- REMOVE OFFER -->
+
+                    <button
+                        type="button"
+                        class="remove-offer-btn"
+                        onclick="removeOffer()"
+                    >
+                        Remove Offer
+                    </button>
+
+
+
+                    <!-- REMOVE COMPLETE FESTIVAL -->
+
+                    <button
+                        type="button"
+                        class="remove-festival-btn"
+                        onclick="removeFestivalUpdate()"
+                    >
+                        Remove Festival Update
+                    </button>
+
+
+                    <!-- STATUS MESSAGE -->
+
+                    <p id="festivalStatus"></p>
+
+
+                </form>
+
+            </section>
+
+
+
+            <!-- =========================
+                 PREVIEW
+            ========================== -->
+
+            <section
+                class="dashboard-section festival-preview"
+            >
+
+                <h2>Preview</h2>
+
+
+                <div id="festivalPreviewBox">
+
+
+                    <h3 id="previewName">
+                        Festival Name
+                    </h3>
+
+
+                    <p id="previewMessage">
+                        Your festival message will appear here.
+                    </p>
+
+
+                    <strong id="previewOffer">
+                        Special offer will appear here.
+                    </strong>
+
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+
+        /* =================================
+           ADMIN LOGIN CHECK
+        ================================= */
+
+        const adminToken =
+            localStorage.getItem("adminToken");
+
+
+        if (!adminToken) {
+
+            window.location.href = "login.html";
+
+        }
+
+
+
+        /* =================================
+           LOGOUT
+        ================================= */
+
+        function logoutAdmin() {
+
+            localStorage.removeItem("adminToken");
+
+            localStorage.removeItem("adminUser");
+
+            window.location.href = "login.html";
+
+        }
+
+
+
+        /* =================================
+           GET HTML ELEMENTS
+        ================================= */
+
+        const festivalForm =
+            document.getElementById("festivalForm");
+
+
+        const festivalName =
+            document.getElementById("festivalName");
+
+
+        const festivalMessage =
+            document.getElementById("festivalMessage");
+
+
+        const festivalOffer =
+            document.getElementById("festivalOffer");
+
+
+        const previewName =
+            document.getElementById("previewName");
+
+
+        const previewMessage =
+            document.getElementById("previewMessage");
+
+
+        const previewOffer =
+            document.getElementById("previewOffer");
+
+
+        const festivalStatus =
+            document.getElementById("festivalStatus");
+
+
+
+        /* =================================
+           LOAD FESTIVAL FROM MONGODB
+        ================================= */
+
+        async function loadFestival() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "https://shri-shiv-enterprises-backened.onrender.com/api/festivals"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Failed to load festival"
+                    );
+
+                }
+
+
+                if (
+                    data.festivals &&
+                    data.festivals.length > 0
+                ) {
+
+                    const festivalData =
+                        data.festivals[0];
+
+
+                    festivalName.value =
+                        festivalData.name || "";
+
+
+                    festivalMessage.value =
+                        festivalData.message || "";
+
+
+                    festivalOffer.value =
+                        festivalData.offer || "";
+
+
+                    updatePreview(
+                        festivalData
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Load Festival Error:",
+                    error
+                );
+
+                festivalStatus.textContent =
+                    "Unable to load festival from server.";
+
+                festivalStatus.style.color =
+                    "red";
+
+            }
+
+        }
+
+
+
+        /* =================================
+           UPDATE PREVIEW
+        ================================= */
+
+        function updatePreview(festivalData) {
+
+
+            previewName.textContent =
+                festivalData.name ||
+                "Festival Name";
+
+
+            previewMessage.textContent =
+                festivalData.message ||
+                "Your festival message will appear here.";
+
+
+            if (
+                festivalData.offer &&
+                festivalData.offer.trim() !== ""
+            ) {
+
+                previewOffer.textContent =
+                    festivalData.offer;
+
+                previewOffer.style.display =
+                    "block";
+
+            } else {
+
+                previewOffer.textContent = "";
+
+                previewOffer.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+
+        /* =================================
+           LIVE FESTIVAL NAME PREVIEW
+        ================================= */
+
+        festivalName.addEventListener(
+            "input",
+            function () {
+
+                previewName.textContent =
+                    festivalName.value ||
+                    "Festival Name";
+
+            }
+        );
+
+
+
+        /* =================================
+           LIVE MESSAGE PREVIEW
+        ================================= */
+
+        festivalMessage.addEventListener(
+            "input",
+            function () {
+
+                previewMessage.textContent =
+                    festivalMessage.value ||
+                    "Your festival message will appear here.";
+
+            }
+        );
+
+
+
+        /* =================================
+           LIVE OFFER PREVIEW
+        ================================= */
+
+        festivalOffer.addEventListener(
+            "input",
+            function () {
+
+                if (
+                    festivalOffer.value.trim() !== ""
+                ) {
+
+                    previewOffer.textContent =
+                        festivalOffer.value;
+
+                    previewOffer.style.display =
+                        "block";
+
+                } else {
+
+                    previewOffer.textContent = "";
+
+                    previewOffer.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+
+
+        /* =================================
+           SAVE FESTIVAL TO MONGODB
+        ================================= */
+
+        festivalForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const festivalData = {
+
+                    name:
+                        festivalName.value.trim(),
+
+                    message:
+                        festivalMessage.value.trim(),
+
+                    offer:
+                        festivalOffer.value.trim()
+
+                };
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "https://shri-shiv-enterprises-backened.onrender.com/api/festivals",
+                            {
+
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Authorization":
+                                        `Bearer ${adminToken}`
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        festivalData
+                                    )
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            "Failed to save festival"
+                        );
+
+                    }
+
+
+                    /* Success message */
+
+                    festivalStatus.textContent =
+                        "Festival update saved successfully!";
+
+                    festivalStatus.style.color =
+                        "green";
+
+
+                    /* Update preview */
+
+                    updatePreview(
+                        festivalData
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Festival Save Error:",
+                        error
+                    );
+
+
+                    festivalStatus.textContent =
+                        "Unable to save festival. Please check server.";
+
+                    festivalStatus.style.color =
+                        "red";
+
+                }
+
+            }
+        );
+
+
+
+        /* =================================
+           REMOVE ONLY OFFER
+        ================================= */
+
+        function removeOffer() {
+
+            festivalOffer.value = "";
+
+
+            previewOffer.textContent = "";
+
+            previewOffer.style.display =
+                "none";
+
+
+            festivalStatus.textContent =
+                "Offer removed from form. Click Save Festival Update to save changes.";
+
+            festivalStatus.style.color =
+                "green";
+
+        }
+
+
+
+        /* =================================
+           REMOVE COMPLETE FESTIVAL UPDATE
+        ================================= */
+
+        function removeFestivalUpdate() {
+
+            const confirmDelete =
+                confirm(
+                    "Are you sure you want to remove this festival update?"
+                );
+
+
+            if (!confirmDelete) {
+
+                return;
+
+            }
+
+
+            festivalName.value = "";
+
+            festivalMessage.value = "";
+
+            festivalOffer.value = "";
+
+
+            previewName.textContent =
+                "Festival Name";
+
+
+            previewMessage.textContent =
+                "Your festival message will appear here.";
+
+
+            previewOffer.textContent = "";
+
+            previewOffer.style.display =
+                "none";
+
+
+            festivalStatus.textContent =
+                "Festival cleared from form. Database delete API will be connected next.";
+
+            festivalStatus.style.color =
+                "green";
+
+        }
+
+
+
+        /* =================================
+           LOAD FESTIVAL WHEN PAGE OPENS
+        ================================= */
+
+        loadFestival();
+
+
+    </script>
+
+
+</body>
+
+</html>
+```
