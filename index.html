@@ -777,17 +777,16 @@
         // =====================================================
         // AUTOMATIC BACKEND URL
         // =====================================================
+        const API_BASE_URL = "https://shri-shiv-enterprises-backened.onrender.com";
 
-        const API_BASE_URL =
-            "https://shri-shiv-enterprises-backened.onrender.com";
+
 
 
         // =====================================================
         // BUSINESS WHATSAPP NUMBER
         // =====================================================
 
-        const WHATSAPP_NUMBER =
-            "917380383694";
+        const WHATSAPP_NUMBER = "917380383694";
 
 
         console.log(
@@ -977,7 +976,7 @@
                                 </span>
 
                                 <img
-                                    src="${product.image}"
+                                    src="images/${product.image}"
                                     alt="${product.name}"
                                     onerror="this.style.display='none'">
 
@@ -1115,7 +1114,7 @@
                         card.innerHTML = `
 
                             <img
-                                src="${item.image}"
+                                src="images/${item.image}"
                                 alt="${item.caption || "Gallery image"}"
                                 onerror="this.style.display='none'">
 
@@ -1533,3 +1532,4 @@ Website: Shri Shiv Enterprises`;
 </body>
 
 </html>
+
