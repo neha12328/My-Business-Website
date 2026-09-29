@@ -162,13 +162,13 @@
                     <!-- Product Image -->
 
                     <label for="productImage">
-                        Image File Name
+                        Product Image
                     </label>
 
                     <input
-                        type="text"
+                        type="file"
                         id="productImage"
-                        placeholder="Example: Golden.jpeg"
+                        accept="image/*"
                         required
                     >
 
@@ -300,7 +300,7 @@
                             </h3>
 
                             <span>
-                                ${product.category}
+                                ${product.category || ""}
                             </span>
 
                             <p>
@@ -375,29 +375,38 @@
                 const description =
                     document.getElementById("productDescription").value.trim();
 
-                const image =
-                    document.getElementById("productImage").value.trim();
+                const imageFile =
+                    document.getElementById("productImage").files[0];
 
 
-                // Create product object
+                // Check image
 
-                const newProduct = {
+                if (!imageFile) {
 
-                    name: name,
+                    productStatus.textContent =
+                        "Please select a product image.";
 
-                    category: category,
+                    productStatus.style.color =
+                        "red";
 
-                    price: price,
+                    return;
+                }
 
-                    description: description,
 
-                    image: image
-                };
+                // Create FormData
+
+                const formData = new FormData();
+
+                formData.append("name", name);
+                formData.append("category", category);
+                formData.append("price", price);
+                formData.append("description", description);
+                formData.append("image", imageFile);
 
 
                 console.log(
-                    "Product being sent:",
-                    newProduct
+                    "Product image selected:",
+                    imageFile.name
                 );
 
 
@@ -409,10 +418,11 @@
                             method: "POST",
 
                             headers: {
-                                "Content-Type": "application/json"
+                                Authorization:
+                                    `Bearer ${adminToken}`
                             },
 
-                            body: JSON.stringify(newProduct)
+                            body: formData
                         }
                     );
 
